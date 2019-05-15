@@ -3,9 +3,15 @@ from tkinter import *
 from http.client import HTTPSConnection
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
+import re
+import folium
 
 import smtplib
 from email.mime.text import MIMEText
+
+dms='126˚59˙53.65'
+dms=re.findall("\d+",dms) #숫자만 나누기
+
 
 class TKWindow:
     def __init__(self):
