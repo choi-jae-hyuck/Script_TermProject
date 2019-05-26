@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from tkinter import *
-from http.client import HTTPSConnection
+from tkinter import font
+import http.client
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
 import re
@@ -8,6 +9,7 @@ import folium
 
 import smtplib
 from email.mime.text import MIMEText
+from xml.etree import ElementTree
 
 dms='126˚59˙53.65'
 dms=re.findall("\d+",dms) #숫자만 나누기
@@ -24,82 +26,163 @@ class TKWindow:
         window=Tk()
         window.title("show")
         window.geometry("800x600")
-        Label(window, text="시도").place(x=500,y=40)
+        Label(window, text="시도").place(x=500,y=45)
+        TempFont = font.Font(window, size=20, weight='bold', family='Consolas')
         self.SIDOScroll=Scrollbar(window,width=20)
-        self.SIDOScroll.place(x=700,y=30)
-        self.SiDOList=Listbox(window,activestyle='none',width=18, height=1, borderwidth=12, relief='ridge'
-                              ,yscrollcommand=self.SIDOScroll.set)
-        self.SiDOList.place(x=550,y=30)
+        self.SIDOScroll.place(x=722,y=30)
+        self.SIDOLList=Listbox(window,font=TempFont,activestyle='none',width=10, height=1, borderwidth=10, relief='ridge',
+                              yscrollcommand=self.SIDOScroll.set)
         self.InsertSIDO()
+        self.SIDOLList.place(x=550,y=30)
 
-        Label(window, text="시군구").place(x=495,y=70)
-        self.SIGUNScroll=Scrollbar(window,width=20)
-        self.SIGUNScroll.place(x=700,y=70)
-        self.SiGUNList = Listbox(window, activestyle='none', width=18, height=1, borderwidth=12, relief='ridge'
-                                , yscrollcommand=self.SIGUNScroll.set)
-        self.SiGUNList.place(x=550, y=70)
+
+        Label(window, text="시군구").place(x=495,y=110)
+        #self.SIGUNScroll=Scrollbar(window,width=20)
+        #self.SIGUNScroll.place(x=700,y=80)
+        self.SIGUNList = Entry(window, width=25, borderwidth=3)
+        self.SIGUNList.place(x=550, y=110)
 
         self.searchButton=Button(window,text="검색",command=self.Search)
-        self.searchButton.place(x=690,y=120)
+        self.searchButton.place(x=690,y=140)
         self.quickButton=Button(window,text="즐겨찾기")
-        self.quickButton.place(x=620,y=120)
-        Text(window,width=45,height=20).place(x=450,y=300)
+        self.quickButton.place(x=620,y=140)
+        self.TEXTLIST = Listbox(window,width=45,height=20)
+        self.TEXTLIST.place(x=450,y=200)
+        self.TEXTLIST.bind('<<ListboxSelect>>', self.SelectBuild)
 
-
-        Label(window,text="관광지명").place(x=150,y=20)
-        Label(window, text="설명문").place(x=155,y=60)
-        Text(window,width=45,height=12).place(x=30,y=90)
+        TempFont = font.Font(window, size=20, weight='bold', family='Consolas')
+        self.NAME=Label(window,text="관광지명",width=20,font=TempFont)
+        self.NAME.place(x=30,y=20)
+        self.TAG=Label(window, text="분류",width=100)
+        self.TAG.place(x=-175,y=70)
+        self.EXPLAIN=Text(window,width=45,height=14)
+        self.EXPLAIN.place(x=30,y=100)
 
 
         self.earth = PhotoImage(file="Image/sample.png")
-        Label(window,text="Tel : 000-000-000").place(x=240,y=270)
+        self.Phone=Label(window,text="Tel : 000-000-000",width=20,font=TempFont)
+        self.Phone.place(x=30,y=300)
         Label(window, image=self.earth).place(x=30, y=340)
 
         window.mainloop()
 
     def Search(self):
-        sido=self.SiDOList.curselection()[0]
-        sigun="a"
-        self.url=userURLBuilder(List_url,ServiceKey=Key, SIDO=sido, GUNGU=str(sigun))
-        print(sido)
-        print(sigun)
+        sido_s=self.SIDOScroll.get()[1]
+        if sido_s == 0.0625:
+            self.Sido="서울특별시"
+        elif sido_s == 0.125:
+            self.Sido ="부산광역시"
+        elif sido_s == 0.1875:
+            self.Sido ="대구광역시"
+        elif sido_s == 0.25:
+            self.Sido ="인천광역시"
+        elif sido_s == 0.3125:
+            self.Sido ="광주광역시"
+        elif sido_s == 0.375:
+            self.Sido ="대전광역시"
+        elif sido_s == 0.4375:
+            self.Sido ="울산광역시"
+        elif sido_s == 0.5:
+            self.Sido ="제주특별자치도"
+        elif sido_s == 0.5625:
+            self.Sido ="경기도"
+        elif sido_s == 0.625:
+            self.Sido ="강원도"
+        elif sido_s == 0.6875:
+            self.Sido ="충청북도"
+        elif sido_s == 0.75:
+            self.Sido ="충청남도"
+        elif sido_s == 0.8125:
+            self.Sido ="전라북도"
+        elif sido_s == 0.875:
+            self.Sido ="전라남도"
+        elif sido_s == 0.9375:
+            self.Sido ="경상북도"
+        elif sido_s == 1.0:
+            self.Sido ="경상남도"
+        self.Sigun=self.SIGUNList.get()
+
+        self.url=userURLBuilder(List_url,ServiceKey=Key, SIDO=self.Sido, GUNGU=self.Sigun)
         print(self.url)
+        self.SearchList()
 
     def InsertSIDO(self):
-        self.SiDOList.insert(1, "서울특별시")
-        self.SiDOList.insert(2, "부산광역시")
-        self.SiDOList.insert(3, "대구광역시")
-        self.SiDOList.insert(4, "인천광역시")
-        self.SiDOList.insert(5, "광주광역시")
-        self.SiDOList.insert(6, "대전광역시")
-        self.SiDOList.insert(7, "울산광역시")
-        self.SiDOList.insert(8, "제주특별자치도")
-        self.SiDOList.insert(9, "경기도")
-        self.SiDOList.insert(10, "강원도")
-        self.SiDOList.insert(11, "충청북도")
-        self.SiDOList.insert(12, "충청남도")
-        self.SiDOList.insert(13, "전라북도")
-        self.SiDOList.insert(14, "전라남도")
-        self.SiDOList.insert(15, "경상북도")
-        self.SiDOList.insert(16, "경상남도")
-        self.SIDOScroll.config(command=self.SiDOList.yview)
+        self.SIDOLList.insert(1, "서울특별시")
+        self.SIDOLList.insert(2, "부산광역시")
+        self.SIDOLList.insert(3, "대구광역시")
+        self.SIDOLList.insert(4, "인천광역시")
+        self.SIDOLList.insert(5, "광주광역시")
+        self.SIDOLList.insert(6, "대전광역시")
+        self.SIDOLList.insert(7, "울산광역시")
+        self.SIDOLList.insert(8, "제주특별자치도")
+        self.SIDOLList.insert(9, "경기도")
+        self.SIDOLList.insert(10, "강원도")
+        self.SIDOLList.insert(11, "충청북도")
+        self.SIDOLList.insert(12, "충청남도")
+        self.SIDOLList.insert(13, "전라북도")
+        self.SIDOLList.insert(14, "전라남도")
+        self.SIDOLList.insert(15, "경상북도")
+        self.SIDOLList.insert(16, "경상남도")
+        self.SIDOScroll.config(command=self.SIDOLList.yview)
 
-    def ScrollMove(self):
-        pass
+    def SearchList(self):
+        self.DATALIST = []
+        if len(self.DATALIST)>0:
+            self.TEXTLIST.delete(1.0,END)
+            self.TEXTLIST.update()
+
+        req=requests.get(self.url)
+        tree=ElementTree.fromstring(req.text)
+        itemElements = tree.getiterator("item")
+
+        for item in itemElements:
+            self.DATA = {}
+            tag = item.find("ASctnNm")
+            name = item.find("BResNm")
+            self.DATA['tag']=tag.text
+            self.DATA['name']=name.text
+            self.DATALIST.append(self.DATA)
+
+        for i in range(len(self.DATALIST)):
+            str_name="["+ str(i+1) + "] 시설명 : " + self.DATALIST[i]['name']
+            self.TEXTLIST.insert(i, str_name)
+
+    def SelectBuild(self,evt):
+        i=self.TEXTLIST.curselection()[0]
+        NM=self.DATALIST[i]['name']
+        self.url_d = userURLBuilder(Detail_url, ServiceKey=Key, SIDO=self.Sido, GUNGU=self.Sigun, RES_NM=NM)
+
+        req = requests.get(self.url_d)
+        tree = ElementTree.fromstring(req.text)
+        itemElements = tree.getiterator("item")
+        self.DATALIST_d=[]
+        for item in itemElements:
+            self.DATA_d = {}
+            explain=item.find("FSimpleDesc")
+            phone=item.find("KPhone")
+            if explain is None:
+                self.DATA_d['explain'] = "설명없음"
+            else:
+                self.DATA_d['explain'] = explain.text
+            self.DATA_d['phone'] = phone.text
+            self.DATALIST_d.append(self.DATA_d)
+        print(self.DATALIST_d)
+        self.NAME.configure(text=self.DATALIST[i]['name'])
+        self.TAG.configure(text=self.DATALIST[i]['tag'])
+        self.EXPLAIN.delete(1.0, END)
+        self.EXPLAIN.update()
+        self.EXPLAIN.insert(1.0,self.DATALIST_d[0]['explain'])
+        self.Phone.configure(text=self.DATALIST_d[0]['phone'])
 
 
 
-def connectOpenAPIServer():
-    global conn, server
-    conn = HTTPSConnection(server)
-    conn.set_debuglevel(1)
+
 
 def userURLBuilder(url, **user):
     str = url + "?"
     for key in user.keys():
         str += key + "=" + user[key] + "&"
     return str
-
 
 
 TKWindow()
