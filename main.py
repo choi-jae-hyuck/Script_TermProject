@@ -4,6 +4,7 @@ from tkinter import font
 import http.client
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import requests
+
 import re
 import folium
 
@@ -127,8 +128,8 @@ class TKWindow:
 
     def SearchList(self):
         self.DATALIST = []
-        if len(self.DATALIST)>0:
-            self.TEXTLIST.delete(1.0,END)
+        if self.TEXTLIST.size()>0:
+            self.TEXTLIST.delete(0,END)
             self.TEXTLIST.update()
 
         req=requests.get(self.url)
@@ -151,6 +152,7 @@ class TKWindow:
         i=self.TEXTLIST.curselection()[0]
         NM=self.DATALIST[i]['name']
         self.url_d = userURLBuilder(Detail_url, ServiceKey=Key, SIDO=self.Sido, GUNGU=self.Sigun, RES_NM=NM)
+        self.GoogleImageSearch(NM)
 
         req = requests.get(self.url_d)
         tree = ElementTree.fromstring(req.text)
@@ -166,13 +168,28 @@ class TKWindow:
                 self.DATA_d['explain'] = explain.text
             self.DATA_d['phone'] = phone.text
             self.DATALIST_d.append(self.DATA_d)
-        print(self.DATALIST_d)
+        #print(self.DATALIST_d)
         self.NAME.configure(text=self.DATALIST[i]['name'])
         self.TAG.configure(text=self.DATALIST[i]['tag'])
         self.EXPLAIN.delete(1.0, END)
         self.EXPLAIN.update()
         self.EXPLAIN.insert(1.0,self.DATALIST_d[0]['explain'])
         self.Phone.configure(text=self.DATALIST_d[0]['phone'])
+
+    def GoogleImageSearch(self,NM):
+        from io import  StringIO
+        from lxml.html import parse
+        import urllib.request
+        keyword=NM
+        url='https://www.google.co.kr/search?q='+keyword+'&source=lnms&tbm=isch&sa=X&ved=0ahUKEwic-taB9IXVAhWDHpQKHXOjC14Q_AUIBigB&biw=1842&bih=990'
+        text = requests.get(url).text
+        text_source = StringIO(text)
+        parsed = parse(text_source)
+
+        doc=parsed.getroot()
+        imgs=doc.findall('.//img')
+        img=imgs[3].get('src')
+        urllib.request.urlretrieve(img,".\Image"+ "\image.png")
 
 
 
