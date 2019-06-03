@@ -60,11 +60,15 @@ class TKWindow:
         self.EXPLAIN.place(x=30,y=100)
 
 
-        self.earth = PhotoImage(file="Image/sample.png")
+
+
+
         self.Phone=Label(window,text="Tel : 000-000-000",width=20,font=TempFont)
         self.Phone.place(x=30,y=300)
-        Label(window, image=self.earth).place(x=30, y=340)
-
+        self.earth = PhotoImage(file="./Image/sample.png")
+        #Label(window, image=self.earth).place(x=30, y=340)
+        self.EARTH = Button(window, overrelief="solid", width=310,height=230,image=self.earth)
+        self.EARTH.place(x=30, y=340)
         window.mainloop()
 
     def Search(self):
@@ -189,7 +193,12 @@ class TKWindow:
         doc=parsed.getroot()
         imgs=doc.findall('.//img')
         img=imgs[3].get('src')
-        urllib.request.urlretrieve(img,".\Image"+ "\image.png")
+        urllib.request.urlretrieve(img,"./Image/Build.png")
+
+        self.earth2 = PhotoImage(file="./Image/Build.png") #안됨
+        self.EARTH.config(image=self.earth2)
+
+
 
 
 
