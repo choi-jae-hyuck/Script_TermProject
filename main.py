@@ -181,23 +181,22 @@ class TKWindow:
         self.Phone.configure(text=self.DATALIST_d[0]['phone'])
 
     def GoogleImageSearch(self,NM):
-        from io import  StringIO
+        from io import StringIO
         from lxml.html import parse
         import urllib.request
-        keyword=NM
+        from PIL import Image,ImageTk
+        keyword = NM  # 키워드
         url='https://www.google.co.kr/search?q='+keyword+'&source=lnms&tbm=isch&sa=X&ved=0ahUKEwic-taB9IXVAhWDHpQKHXOjC14Q_AUIBigB&biw=1842&bih=990'
         text = requests.get(url).text
         text_source = StringIO(text)
         parsed = parse(text_source)
 
-        doc=parsed.getroot()
-        imgs=doc.findall('.//img')
-        img=imgs[3].get('src')
-        urllib.request.urlretrieve(img,"./Image/Build.png")
-
-        self.earth2 = PhotoImage(file="./Image/Build.png") #안됨
+        doc = parsed.getroot()
+        imgs = doc.findall('.//img')
+        img = imgs[3].get('src')
+        urllib.request.urlretrieve(img, "./Image/Build.png")
+        self.earth2 = ImageTk.PhotoImage(Image.open("./Image/Build.png"))  # 안됨
         self.EARTH.config(image=self.earth2)
-
 
 
 
