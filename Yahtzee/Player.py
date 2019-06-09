@@ -9,14 +9,21 @@ class Player:
     def setScore(self, score, index):
         self.scores[index]=score
 
+
     def setAtUsed(self,index):
-        pass
+        self.used[index]=True
 
     def getUpperScore(self):#상위 6개 카테고리 정수의 합을 반환
-        pass
+        sum=0
+        for i in range(self.UPPER):
+            sum += self.scores[i]
+        return sum
 
     def getLowerScore(self):#하위 7개 카테고리 정수의 합을 반환
-        pass
+        sum = 0
+        for i in range(self.UPPER,self.UPPER+self.LOWER):
+            sum += self.scores[i]
+        return sum
 
     def getUsed(self):
         pass

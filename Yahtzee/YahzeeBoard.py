@@ -144,12 +144,42 @@ class YahtzeeBoard:
                                                                 str(self.players[self.player].getUpperScore()+
                                                                     self.players[self.player].getLowerScore()))
 
-        # 다음 플레이어로 넘어가고 선택할 수 없는 카테고리들은 disable 시킴
+        # O 다음 플레이어로 넘어가고 선택할 수 없는 카테고리들은 disable 시킴
         self.player = (self.player + 1) % self.numPlayers
         for i in range(self.TOTAL + 1):
             for j in range(self.numPlayers):
-                pass
+                if (j != self.player or (i - 1) == self.UPPERTOTAL or (i - 1) == self.UPPERBONUS
+                        or (i - 1) == self.LOWERTOTAL or (i - 1) == self.TOTAL):
+                    self.fields[i - 1][j]['state'] = 'disabled'
+                    self.fields[i - 1][j]['bg'] = 'light gray'
+                else:
+                    if self.fields[i - 1][j]['text'] is '':
+                        self.fields[i - 1][j]['state'] = 'normal'
+                        self.fields[i - 1][j]['bg'] = 'SystemButtonFace'
 
+        # O 다시 Roll Dice 과 diceButtons 버튼 활성화, bottomLabel 초기화
+        self.roll=0
+        self.rollDice['state'] = 'normal'
+        self.rollDice['bg'] = 'SystemButtonFace'
+        for i in range(5):
+            self.diceButtons[i]['state'] = 'normal'
+            self.diceButtons[i]['bg'] = 'SystemButtonFace'
+        self.bottomLabel.configure(text=self.players[self.player].toString() + "차례: Roll Dice 버튼을 누르세요")
+
+        # X 라운드 증가 시키고 종료 검사
+        if (self.player == 0):
+            self.round += 1
+        if (self.round == 13):
+            winner = None
+            max = int(self.fields[self.TOTAL][j]['text'])
+            for j in range(self.numPlayers):
+                if max < int(self.fields[self.TOTAL][j]['text']):
+                    max = int(self.fields[self.TOTAL][j]['text'])
+                    winner = j
+            if winner is None:
+                self.bottomLabel.configure(text="비김")
+            else:
+                self.bottomLabel.configure(text=self.players[self.player].toString() + "의 승리")
 
 
 YahtzeeBoard()
