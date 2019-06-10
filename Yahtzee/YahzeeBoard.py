@@ -170,16 +170,18 @@ class YahtzeeBoard:
         if (self.player == 0):
             self.round += 1
         if (self.round == 13):
-            winner = None
-            max = int(self.fields[self.TOTAL][j]['text'])
+            winner = 0
+            max = int(self.fields[self.TOTAL][0]['text'])
             for j in range(self.numPlayers):
                 if max < int(self.fields[self.TOTAL][j]['text']):
                     max = int(self.fields[self.TOTAL][j]['text'])
                     winner = j
+                elif max == int(self.fields[self.TOTAL][j]['text']):
+                    winner =None
             if winner is None:
                 self.bottomLabel.configure(text="비김")
             else:
-                self.bottomLabel.configure(text=self.players[self.player].toString() + "의 승리")
+                self.bottomLabel.configure(text=self.players[winner].toString() + "의 승리")
 
 
 YahtzeeBoard()
