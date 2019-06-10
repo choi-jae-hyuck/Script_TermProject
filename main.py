@@ -193,8 +193,13 @@ class TKWindow:
 
         doc = parsed.getroot()
         imgs = doc.findall('.//img')
-        img = imgs[3].get('src')
+        img = imgs[4].get('src')
         urllib.request.urlretrieve(img, "./Image/Build.png")
+
+        im=Image.open("./Image/Build.png")
+        im2=im.resize((300,230))
+        im2.save("./Image/Build.png")
+
         self.earth2 = ImageTk.PhotoImage(Image.open("./Image/Build.png"))  # 안됨
         self.EARTH.config(image=self.earth2)
 
