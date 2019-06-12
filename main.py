@@ -203,6 +203,23 @@ class TKWindow:
         self.earth2 = ImageTk.PhotoImage(Image.open("./Image/Build.png"))  # 안됨
         self.EARTH.config(image=self.earth2)
 
+        self.GoogleMap(NM)
+
+    def GoogleMap(self,NM):
+        import requests
+        from bs4 import BeautifulSoup
+        import folium
+        address=NM
+        url="https://maps.googleapis.com/maps/api/geocode/xml?address="+address +"&key=AIzaSyBqGlKXTonSH1Sjd_eztuZpF2791ShpU5E"
+        resq=requests.get(url)
+        html=BeautifulSoup(resq.text,"lxml")
+        lat=html.select("location>lat")
+        lng=html.select("location>lng")
+        w=lat[0].get_text()
+        h=lng[0].get_text()
+        map=folium.Map(location=[w,h],zoom_start=15)
+        folium.Marker(location=[w,h],popup=address).add_to(map)
+        map.save("./Image/Map.html")
 
 
 
