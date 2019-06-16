@@ -9,7 +9,6 @@ import requests
 
 import re
 import folium
-
 import smtplib
 from email.mime.text import MIMEText
 from xml.etree import ElementTree
@@ -28,41 +27,44 @@ class TKWindow:
     def __init__(self):
         self.window=Tk()
         self.window.title("show")
-        self.window.geometry("800x600")
-        Label(self.window, text="시도").place(x=500,y=45)
+        self.window.geometry("700x600")
+        Label(self.window, text="시도").place(x=440,y=45)
         TempFont = font.Font(self.window, size=20, weight='bold', family='Consolas')
         self.Sido = "서울특별시"
         self.SIDOScroll=Scrollbar(self.window,width=20)
-        self.SIDOScroll.place(x=722,y=30)
+        self.SIDOScroll.place(x=650,y=30)
         self.SIDOLList=Listbox(self.window,font=TempFont,activestyle='none',width=10, height=1, borderwidth=10, relief='ridge',
                               yscrollcommand=self.SIDOScroll.set)
         self.InsertSIDO()
-        self.SIDOLList.place(x=550,y=30)
+        self.SIDOLList.place(x=480,y=30)
 
 
-        Label(self.window, text="시군구").place(x=495,y=110)
+        Label(self.window, text="시군구").place(x=430,y=110)
         #self.SIGUNScroll=Scrollbar(self.window,width=20)
         #self.SIGUNScroll.place(x=700,y=80)
         self.SIGUNList = Entry(self.window, width=25, borderwidth=3)
-        self.SIGUNList.place(x=550, y=110)
+        self.SIGUNList.place(x=480, y=110)
 
         self.searchButton=Button(self.window,text="검색",command=self.Search)
-        self.searchButton.place(x=690,y=140)
-        self.quickButton=Button(self.window,text="지역별 리스트",command=self.newWindow)
-        self.quickButton.place(x=600,y=140)
+        self.searchButton.place(x=635,y=140)
+        self.graphImage = ImageTk.PhotoImage(Image.open("./Image/graph.png"))
+        self.graphButton=Button(self.window,text="지역별 리스트",command=self.newWindow,image=self.graphImage)
+        self.graphButton.place(x=570,y=140)
 
+        self.MailAddress=Entry(self.window,width=25, borderwidth=3)
+        self.MailAddress.place(x=385, y=550)
         self.MailImage=ImageTk.PhotoImage(Image.open("./Image/mail.png"))
         self.MailButton = Button(self.window, image=self.MailImage, command=self.SendMail)
-        self.MailButton.place(x=500, y=140)
-        self.TEXTLIST = Listbox(self.window,width=45,height=20)
-        self.TEXTLIST.place(x=450,y=200)
+        self.MailButton.place(x=585, y=545)
+        self.TEXTLIST = Listbox(self.window,width=40,height=20)
+        self.TEXTLIST.place(x=380,y=200)
         self.TEXTLIST.bind('<<ListboxSelect>>', self.SelectBuild)
 
         TempFont = font.Font(self.window, size=20, weight='bold', family='Consolas')
         self.NAME=Label(self.window,text="관광지명",width=20,font=TempFont)
         self.NAME.place(x=30,y=20)
-        self.TAG=Label(self.window, text="분류",width=100)
-        self.TAG.place(x=-175,y=70)
+        self.TAG=Label(self.window, text="분류",width=80)
+        self.TAG.place(x=-95,y=70)
         self.EXPLAIN=Text(self.window,width=45,height=14)
         self.EXPLAIN.place(x=30,y=100)
 
@@ -160,9 +162,9 @@ class TKWindow:
 
     def SelectBuild(self,evt):
         i=self.TEXTLIST.curselection()[0]
-        NM=self.DATALIST[i]['name']
-        self.url_d = userURLBuilder(Detail_url, ServiceKey=Key, SIDO=self.Sido, GUNGU=self.Sigun, RES_NM=NM)
-        self.GoogleImageSearch(NM)
+        self.NM=self.DATALIST[i]['name']
+        self.url_d = userURLBuilder(Detail_url, ServiceKey=Key, SIDO=self.Sido, GUNGU=self.Sigun, RES_NM=self.NM)
+        self.GoogleImageSearch(self.NM)
 
         req = requests.get(self.url_d)
         tree = ElementTree.fromstring(req.text)
@@ -209,13 +211,13 @@ class TKWindow:
         self.earth2 = ImageTk.PhotoImage(Image.open("./Image/Build.png"))
         self.EARTH.config(image=self.earth2)
 
-        self.GoogleMap(NM)
+        self.GoogleMap(self.NM)
 
     def GoogleMap(self,NM):
         import requests
         from bs4 import BeautifulSoup
         import folium
-        address=NM
+        address=self.NM
         url="https://maps.googleapis.com/maps/api/geocode/xml?address="+address +"&key=AIzaSyBqGlKXTonSH1Sjd_eztuZpF2791ShpU5E"
         resq=requests.get(url)
         html=BeautifulSoup(resq.text,"lxml")
@@ -228,7 +230,53 @@ class TKWindow:
         map.save("./Image/Map.html")
 
     def SendMail(self):
-        pass
+        import mimetypes
+        import smtplib
+        import spam
+        from email.mime.base import MIMEBase
+        from email.mime.image import MIMEImage
+        from email.mime.text import MIMEText
+
+        # global value
+        host = "smtp.gmail.com"  # Gmail STMP 서버 주소.
+        port = "587"
+        htmlFileName = ".\Image\Map.html"
+        htmlFileName2 = ".\Image\Build.png"
+
+        senderAddr = spam.ID()  # 보내는 사람 email 주소.
+        recipientAddr = self.MailAddress.get()  # 받는 사람 email 주소.
+
+        msg = MIMEBase("multipart", "alternative")
+        msg['Subject'] = "Script Tour Mail "
+        msg['From'] = senderAddr
+        msg['To'] = recipientAddr
+
+        # MIME 문서를 생성합니다.
+        text = MIMEText("스크립트 관광지 사진 \n"
+                        +"관광지 :"+self.NM+"\n"
+                        +"설명 :"+self.DATALIST_d[0]['explain']+"\n"
+                        +"전화번호 :"+self.DATALIST_d[0]['phone']+"\n")
+        htmlFD = open(htmlFileName, 'rb')
+        htmlFD2 = open(htmlFileName2, 'rb')
+        HtmlPart = MIMEBase(htmlFD.read(), 'html', _charset='UTF-8')
+        HtmlPart2 = MIMEImage(htmlFD2.read(), 'png', _charset='UTF-8')
+        htmlFD.close()
+        htmlFD2.close()
+
+        # 만들었던 mime을 MIMEBase에 첨부 시킨다.
+        msg.attach(text)
+        msg.attach(HtmlPart)
+        msg.attach(HtmlPart2)
+
+        # 메일을 발송한다.
+        s = smtplib.SMTP(host, port)
+        # s.set_debuglevel(1)        # 디버깅이 필요할 경우 주석을 푼다.
+        s.ehlo()
+        s.starttls()
+        s.ehlo()
+        s.login(spam.ID(), spam.password())
+        s.sendmail(senderAddr, [recipientAddr], msg.as_string())
+        s.close()
 
     def newWindow(self):
         self.ScrollSido()
@@ -284,8 +332,6 @@ class TKWindow:
             List={"거제시":10,"김해시":10,"밀양시":10,"사천시":9,"양산시":10,"진주시":5,"창원시":0,"통영시":10,
             "거창군":10,"고성군":4,"남해군":6,"산청군":7,"의령군":1,"창녕군":9,"하동군":10,"함안군":2,"함양군":3,
                   "합천군":6}
-        for i in List:
-            print(i)
         self.graphwindow = Toplevel(self.window)
         self.canvas = Canvas(self.graphwindow, bg="white", width=400, height=200)
         self.canvas.config(scrollregion=(0, 0, 150, len(List)*40))
