@@ -164,6 +164,7 @@ class YahtzeeBoard:
         for i in range(5):
             self.diceButtons[i]['state'] = 'normal'
             self.diceButtons[i]['bg'] = 'SystemButtonFace'
+            self.diceButtons[i].configure(text="?")
         self.bottomLabel.configure(text=self.players[self.player].toString() + "차례: Roll Dice 버튼을 누르세요")
 
         # X 라운드 증가 시키고 종료 검사
@@ -176,7 +177,7 @@ class YahtzeeBoard:
                 if max < int(self.fields[self.TOTAL][j]['text']):
                     max = int(self.fields[self.TOTAL][j]['text'])
                     winner = j
-                elif max == int(self.fields[self.TOTAL][j]['text']):
+                elif max == int(self.fields[self.TOTAL][j]['text'])and j !=0:
                     winner =None
             if winner is None:
                 self.bottomLabel.configure(text="비김")

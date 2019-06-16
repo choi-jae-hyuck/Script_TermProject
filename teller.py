@@ -68,7 +68,7 @@ def handle(msg):
         replyAptData(args[1],chat_id, args[0] )
 
     else:
-        noti.sendMessage(chat_id, '모르는 명령어입니다.\n지역[시도] , 지구[시군구] , 확인 중 하나의 명령을 입력하세요.')
+        noti.sendMessage(chat_id, '모르는 명령어입니다.\n지역[시도] , 지구[시군구] 명령어를 입력하세요\n ex)서울특별시 종로구')
 
 
 today = date.today()
