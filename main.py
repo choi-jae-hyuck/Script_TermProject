@@ -231,9 +231,6 @@ class TKWindow:
         pass
 
     def newWindow(self):
-        self.graphwindow=Toplevel(self.window)
-        self.canvas = Canvas(self.graphwindow, bg="white", width=600, height=300)
-        self.canvas.pack()
         self.ScrollSido()
         List={}
         if self.Sido=="서울특별시":
@@ -276,13 +273,33 @@ class TKWindow:
             List={"전주시":10,"군산시":10,"김제시":4,"남원시":10,"익산시":8,"정읍시":10,"고창군":10,"무주군":10,
             "부안군":10,"순창군":10,"완주군":10,"임실군":10,"장수군":10,"진안군":7}
         elif self.Sido == "전라남도":
-            List={}
+            List={"광양시":10,"나주시":10,"목포시":10,"순천시":10,"여수시":10,"강진군":10,"고흥군":10,"곡성군":10,
+            "구례군":10,"담양군":8,"무안군":10,"보성군":10,"신안군":10,"영광군":10,"영암군":8,"완도군":8,
+            "장성군":7,"장흥군":8,"진도군":10,"해남군":10,"함평군":5,"화순군":10}
         elif self.Sido == "경상북도":
-            List={}
+            List={"경산시":9,"경주시":10,"구미시":10,"김천시":10,"문경시":10,"상주시":9,"안동시":10,"영주시":10,
+            "영천시":10,"포항시":10,"고령군":10,"군위군":6,"봉화군":5,"성주군":10,"예천군":4,"영덕군":10,"영양군":7,
+            "울릉군":7,"울진군":10,"의성군":7,"청도군":10,"청송군":10,"칠곡군":6}
         elif self.Sido == "경상남도":
-            List={}
+            List={"거제시":10,"김해시":10,"밀양시":10,"사천시":9,"양산시":10,"진주시":5,"창원시":0,"통영시":10,
+            "거창군":10,"고성군":4,"남해군":6,"산청군":7,"의령군":1,"창녕군":9,"하동군":10,"함안군":2,"함양군":3,
+                  "합천군":6}
         for i in List:
             print(i)
+        self.graphwindow = Toplevel(self.window)
+        self.canvas = Canvas(self.graphwindow, bg="white", width=400, height=200)
+        self.canvas.config(scrollregion=(0, 0, 150, len(List)*40))
+        sbar = Scrollbar(self.graphwindow)
+        sbar.config(command=self.canvas.yview)
+        self.canvas.config(yscrollcommand=sbar.set)
+        sbar.pack(side=RIGHT, fill=Y)
+        self.canvas.pack()
+        position=0
+        for i in List.keys():
+            self.canvas.create_text(20 , 20 + position * 40, text=i, tags="bar")
+            self.canvas.create_rectangle(60,15 + position * 40 ,60+(List[i]/10)*200,30 + position * 40, tags="bar")
+            self.canvas.create_text(70+(List[i]/10)*200, 22 + position * 40, text=List[i], tags="bar")
+            position+=1
 
 
     def OpenMap(self):
